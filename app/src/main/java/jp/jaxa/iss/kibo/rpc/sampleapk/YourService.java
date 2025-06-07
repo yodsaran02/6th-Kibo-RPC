@@ -61,6 +61,7 @@ public class YourService extends KiboRpcService {
 
 
         // test from me
+        //hello test dek mwit tam araii
     }
 
     @Override
