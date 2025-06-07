@@ -59,6 +59,7 @@ public class YourService extends KiboRpcService {
         // test
         // function image processing lens
 
+
         // test from me
     }
 
@@ -77,3 +78,4 @@ public class YourService extends KiboRpcService {
         return "your method";
     }
 }
+// hfs shift5
