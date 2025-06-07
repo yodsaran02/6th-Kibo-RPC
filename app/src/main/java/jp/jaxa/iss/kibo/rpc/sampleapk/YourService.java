@@ -58,6 +58,8 @@ public class YourService extends KiboRpcService {
         api.takeTargetItemSnapshot();
         // test
         // function image processing lens
+
+        // test from me
     }
 
     @Override
