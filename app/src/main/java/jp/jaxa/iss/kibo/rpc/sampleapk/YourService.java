@@ -1,5 +1,6 @@
 package jp.jaxa.iss.kibo.rpc.sampleapk;
 
+import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
 import gov.nasa.arc.astrobee.types.Point;
@@ -74,9 +75,18 @@ public class YourService extends KiboRpcService {
         // write your plan 3 here.
     }
 
-    // You can add your method.
-    private String yourMethod(){
-        return "your method";
+    // reliable api.moveto
+    private void rMoveTo(Point point, Quaternion quaternion){
+        Result result;
+        final int LOOP_MAX = 5;
+
+        result = api.moveTo(point, quaternion, true);
+
+        int loopCounter = 0;
+        while(!result.hasSucceeded() && loopCounter < LOOP_MAX){
+            result = api.moveTo(point, quaternion, true);
+            ++loopCounter;
+        }
     }
 }
 // hfs shift5
