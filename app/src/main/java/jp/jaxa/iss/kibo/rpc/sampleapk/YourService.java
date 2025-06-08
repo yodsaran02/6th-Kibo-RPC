@@ -21,11 +21,11 @@ public class YourService extends KiboRpcService {
         // Move to a point.
         Point point = new Point(10.9d, -9.92284d, 5.195d);
         Quaternion quaternion = new Quaternion(0f, 0f, -0.707f, 0.707f);
-        api.moveTo(point, quaternion, false);
+        rMoveTo(point, quaternion);
 
         // Get a camera image.
         Mat image = api.getMatNavCam();
-
+        api.saveMatImage(image, "area1.png");
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
         /* If there is a treasure item, remember it.                                        */
@@ -41,7 +41,7 @@ public class YourService extends KiboRpcService {
         // When you move to the front of the astronaut, report the rounding completion.
         point = new Point(11.143d, -6.7607d, 4.9654d);
         quaternion = new Quaternion(0f, 0f, 0.707f, 0.707f);
-        api.moveTo(point, quaternion, false);
+        rMoveTo(point, quaternion);
         api.reportRoundingCompletion();
 
         /* ********************************************************** */
