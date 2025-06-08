@@ -6,6 +6,7 @@ import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
 /**
@@ -76,14 +77,14 @@ public class YourService extends KiboRpcService {
     }
 
     // reliable api.moveto
-    private void rMoveTo(Point point, Quaternion quaternion){
+    private void rMoveTo(Point point, Quaternion quaternion) {
         Result result;
         final int LOOP_MAX = 5;
 
         result = api.moveTo(point, quaternion, true);
 
         int loopCounter = 0;
-        while(!result.hasSucceeded() && loopCounter < LOOP_MAX){
+        while (!result.hasSucceeded() && loopCounter < LOOP_MAX) {
             result = api.moveTo(point, quaternion, true);
             ++loopCounter;
         }

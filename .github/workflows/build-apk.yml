@@ -1,0 +1,55 @@
+name: Build Kibo-RPC APK
+
+on:
+  push:
+    branches: [ deploy ]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    env:
+      ANDROID_HOME: ${{ github.workspace }}/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/android-sdk
+      JAVA_HOME: /usr/lib/jvm/java-8-openjdk-amd64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Java 8, ADB, and Gradle
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-8-jdk adb gradle unzip
+
+      - name: Download and install Android SDK
+        run: |
+          mkdir -p $ANDROID_HOME/cmdline-tools
+          cd $ANDROID_HOME/cmdline-tools
+          curl -O https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip commandlinetools-linux-*.zip -d latest
+          rm commandlinetools-linux-*.zip
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
+
+      - name: Install required SDKs and NDK
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME \
+            "platform-tools" \
+            "platforms;android-25" \
+            "platforms;android-26" \
+            "platforms;android-28" \
+            "build-tools;25.0.3" \
+            "build-tools;26.0.2" \
+            "build-tools;28.0.3" \
+            "ndk;20.0.5594570"
+
+      - name: Build APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kibo-rpc-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
