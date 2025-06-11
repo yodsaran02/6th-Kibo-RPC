@@ -93,7 +93,7 @@ public class YourService extends KiboRpcService {
         }
     }
     private Mat unDistortImage(Mat image){
-        Mat cameraMatrix - new Mat(3,3,CvType.CV_64F);
+        Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
         cameraMatrix.put(0,0,api.getNavCamIntrinsics()[0]);
         Mat cameraCoefficients = new Mat(1,5,CvType.CV_64F);
         cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
