@@ -8,6 +8,7 @@ import gov.nasa.arc.astrobee.types.Quaternion;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.calib3d.Calib3d;
 
 /**
  * Class meant to handle commands from the Ground Data System and execute them in Astrobee.
@@ -26,7 +27,9 @@ public class YourService extends KiboRpcService {
 
         // Get a camera image.
         Mat image = api.getMatNavCam();
-        api.saveMatImage(image, "area1.png");
+        api.saveMatImage(image, "area1_raw.png");
+        Mat undistorted = unDistortImage(image);
+        api.saveMatImage(undistort, "area1_undistorted.png");
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
         /* If there is a treasure item, remember it.                                        */
@@ -88,6 +91,16 @@ public class YourService extends KiboRpcService {
             result = api.moveTo(point, quaternion, true);
             ++loopCounter;
         }
+    }
+    private Mat unDistortImage(Mat image){
+        Mat cameraMatrix - new Mat(3,3,CvType.CV_64F);
+        cameraMatrix.put(0,0,api.getNavCamIntrinsics()[0]);
+        Mat cameraCoefficients = new Mat(1,5,CvType.CV_64F);
+        cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
+        Mat undistortImg = new Mat();
+        Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
+        return undistortImg;
     }
 }
 // hfs shift5
