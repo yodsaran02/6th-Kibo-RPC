@@ -29,7 +29,7 @@ public class YourService extends KiboRpcService {
         Mat image = api.getMatNavCam();
         api.saveMatImage(image, "area1_raw.png");
         Mat undistorted = unDistortImage(image);
-        api.saveMatImage(undistort, "area1_undistorted.png");
+        api.saveMatImage(undistorted, "area1_undistorted.png");
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
         /* If there is a treasure item, remember it.                                        */
