@@ -23,6 +23,11 @@ jobs:
 
       - name: Make Gradle executable
         run: chmod +x ./gradlew
+        
+      - name: Install NDK 21.3.6528147
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "ndk;21.3.6528147"
 
       - name: Build with Gradle
         run: ./gradlew assembleDebug
