@@ -1,6 +1,8 @@
 package jp.jaxa.iss.kibo.rpc.sampleapk;
 
 import android.hardware.Camera;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
@@ -13,8 +15,10 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.aruco.Dictionary;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.*;
+import java.io.InputStream;
 /**
  * Class meant to handle commands from the Ground Data System and execute them in Astrobee.
  */
@@ -22,14 +26,19 @@ import java.util.*;
 public class YourService extends KiboRpcService {
     @Override
     protected void runPlan1(){
+        // Init Camera stuff
+
+        Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
+        cameraMatrix.put(0,0,api.getNavCamIntrinsics()[0]);
+        Mat cameraCoefficients = new Mat(1,5,CvType.CV_64F);
+        cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
+        cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
+
         // Init Aruco dict & list type of stuff
 
         Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         Mat ids = new Mat();
         List<Mat> corners = new ArrayList<>();
-        float markerLength = 0.05f;
-        float targetWidth = 0.15f;
-        float targetLength = 0.27f;
 
         // Init All the area to explore
 
@@ -48,11 +57,13 @@ public class YourService extends KiboRpcService {
         // Get a camera image.
         Mat image = api.getMatNavCam();
         api.saveMatImage(image, "area1_raw.png");
-        Mat undistorted = unDistortImage(image);
+        Mat undistorted_aruco = unDistortImage(image);
+        Mat undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area1_undistorted.png");
-        Aruco.detectMarkers(undistorted, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(undistorted, corners, ids);
-        api.saveMatImage(undistorted, "area1_arucotag.png");
+        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
+        //Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
+
+        api.saveMatImage(undistorted_aruco, "area1_arucotag.png");
 
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
