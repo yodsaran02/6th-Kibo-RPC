@@ -27,6 +27,9 @@ public class YourService extends KiboRpcService {
         Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         Mat ids = new Mat();
         List<Mat> corners = new ArrayList<>();
+        float markerLength = 0.05f;
+        float targetWidth = 0.15f;
+        float targetLength = 0.27f;
 
         // Init All the area to explore
 
@@ -37,6 +40,7 @@ public class YourService extends KiboRpcService {
         api.startMission();
 
         // Move to a point.
+
         Point point;
         Quaternion quaternion;
         rMoveTo(AreaPoint.get(1), AreaQuaternion.get(1));
@@ -46,10 +50,10 @@ public class YourService extends KiboRpcService {
         api.saveMatImage(image, "area1_raw.png");
         Mat undistorted = unDistortImage(image);
         api.saveMatImage(undistorted, "area1_undistorted.png");
-        Aruco.detectMarkers(image, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(image, corners, ids);
-        api.saveMatImage(image, "area1_arucotag.png");
-        
+        Aruco.detectMarkers(undistorted, dictionary, corners, ids);
+        Aruco.drawDetectedMarkers(undistorted, corners, ids);
+        api.saveMatImage(undistorted, "area1_arucotag.png");
+
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
         /* If there is a treasure item, remember it.                                        */
