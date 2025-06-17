@@ -8,6 +8,7 @@ import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
 
+import org.opencv.aruco.Aruco;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.calib3d.Calib3d;
@@ -21,6 +22,12 @@ import java.util.*;
 public class YourService extends KiboRpcService {
     @Override
     protected void runPlan1(){
+        // Init Aruco dict & list type of stuff
+
+        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        Mat ids = new Mat();
+        List<Mat> corners = new ArrayList<>();
+
         // Init All the area to explore
 
         Map<Integer, Point> AreaPoint = new HashMap<>();
@@ -39,6 +46,10 @@ public class YourService extends KiboRpcService {
         api.saveMatImage(image, "area1_raw.png");
         Mat undistorted = unDistortImage(image);
         api.saveMatImage(undistorted, "area1_undistorted.png");
+        Aruco.detectMarkers(image, dictionary, corners, ids);
+        Aruco.drawDetectedMarkers(image, corners, ids);
+        api.saveMatImage(image, "area1_arucotag.png");
+        
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
         /* If there is a treasure item, remember it.                                        */
