@@ -1,5 +1,7 @@
 package jp.jaxa.iss.kibo.rpc.sampleapk;
 
+import android.hardware.Camera;
+
 import gov.nasa.arc.astrobee.Result;
 import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
@@ -9,7 +11,9 @@ import gov.nasa.arc.astrobee.types.Quaternion;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.calib3d.Calib3d;
+import org.opencv.aruco.Dictionary;
 
+import java.util.*;
 /**
  * Class meant to handle commands from the Ground Data System and execute them in Astrobee.
  */
@@ -17,13 +21,18 @@ import org.opencv.calib3d.Calib3d;
 public class YourService extends KiboRpcService {
     @Override
     protected void runPlan1(){
-        // The mission starts.
+        // Init All the area to explore
+
+        Map<Integer, Point> AreaPoint = new HashMap<>();
+        Map<Integer, Quaternion> AreaQuaternion = new HashMap<>();
+        AreaPoint.put(1, new Point(10.9d, -9.92284d, 5.195d));
+        AreaQuaternion.put(1, new Quaternion(0f, 0f, -0.707f, 0.707f));
         api.startMission();
 
         // Move to a point.
-        Point point = new Point(10.9d, -9.92284d, 5.195d);
-        Quaternion quaternion = new Quaternion(0f, 0f, -0.707f, 0.707f);
-        rMoveTo(point, quaternion);
+        Point point;
+        Quaternion quaternion;
+        rMoveTo(AreaPoint.get(1), AreaQuaternion.get(1));
 
         // Get a camera image.
         Mat image = api.getMatNavCam();
@@ -101,6 +110,9 @@ public class YourService extends KiboRpcService {
         Mat undistortImg = new Mat();
         Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
         return undistortImg;
+    }
+    private String ImageRecognition(Mat image){
+        return "object type";
     }
 }
 // hfs shift5
