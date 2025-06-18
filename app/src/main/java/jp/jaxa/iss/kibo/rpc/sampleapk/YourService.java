@@ -47,9 +47,9 @@ public class YourService extends KiboRpcService {
         AreaPoint.put(1, new Point(10.9d, -9.92284d, 5.195d));
         AreaQuaternion.put(1, new Quaternion(0f, 0f, -0.707f, 0.707f));
         AreaPoint.put(2, new Point(10.925d, -8.875d, 4.5d));
-        AreaQuaternion.put(2, new Quaternion(0f,1f,0f,0f));
+        AreaQuaternion.put(2, new Quaternion(-0.7071f, 0f, 0f, 0.7071f));
         AreaPoint.put(3, new Point(10.925d, -7.925d, 4.5d));
-        AreaQuaternion.put(3, new Quaternion(0f,1f,0f,0f));
+        AreaQuaternion.put(3, new Quaternion(-0.7071f, 0f, 0f, 0.7071f));
         AreaPoint.put(4, new Point(10.4d, -6.85d, 4.95d));
         AreaQuaternion.put(4, new Quaternion(0f, 0.7071f, 0f, 0.7071f));
         api.startMission();
