@@ -47,13 +47,18 @@ public class YourService extends KiboRpcService {
         AreaPoint.put(1, new Point(10.9d, -9.92284d, 5.195d));
         AreaQuaternion.put(1, new Quaternion(0f, 0f, -0.707f, 0.707f));
         AreaPoint.put(2, new Point(10.925d, -8.875d, 4.3d));
-        AreaQuaternion.put(2, new Quaternion(1,0,0,0));
+        AreaQuaternion.put(2, new Quaternion(1f,0f,0f,0f));
+        AreaPoint.put(3, new Point(10.925d, -7.925d, 4.3d));
+        AreaQuaternion.put(3, new Quaternion(1f,0f,0f,0f));
+        AreaPoint.put(4, new Point(10.4d, -6.85d, 4.95d));
+        AreaQuaternion.put(4, new Quaternion(0f, 0.7071f, 0f, 0.7071f));
         api.startMission();
 
         // Move to a point.
 
         Point point;
         Quaternion quaternion;
+
         rMoveTo(AreaPoint.get(1), AreaQuaternion.get(1));
 
         // Get a camera image.
@@ -77,6 +82,30 @@ public class YourService extends KiboRpcService {
         Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
         Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
         api.saveMatImage(undistorted_aruco, "area2_arucotag.png");
+
+        rMoveTo(AreaPoint.get(3), AreaQuaternion.get(3));
+
+        // Get a camera image.
+        image = api.getMatNavCam();
+        api.saveMatImage(image, "area3_raw.png");
+        undistorted_aruco = unDistortImage(image);
+        undistorted = undistorted_aruco.clone();
+        api.saveMatImage(undistorted, "area3_undistorted.png");
+        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
+        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
+        api.saveMatImage(undistorted_aruco, "area3_arucotag.png");
+
+        rMoveTo(AreaPoint.get(4), AreaQuaternion.get(4));
+
+        // Get a camera image.
+        image = api.getMatNavCam();
+        api.saveMatImage(image, "area4_raw.png");
+        undistorted_aruco = unDistortImage(image);
+        undistorted = undistorted_aruco.clone();
+        api.saveMatImage(undistorted, "area4_undistorted.png");
+        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
+        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
+        api.saveMatImage(undistorted_aruco, "area4_arucotag.png");
 
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
