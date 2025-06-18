@@ -168,6 +168,11 @@ public class YourService extends KiboRpcService {
             result = api.moveTo(point, quaternion, true);
             ++loopCounter;
         }
+        try {
+            Thread.sleep(500);  // wait 1 second after move completes
+        } catch (InterruptedException e) {
+        }
+
     }
     private Mat unDistortImage(Mat image){
         Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
