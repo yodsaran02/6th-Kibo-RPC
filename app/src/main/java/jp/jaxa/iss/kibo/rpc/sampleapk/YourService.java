@@ -15,6 +15,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.aruco.Dictionary;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.*;
@@ -25,12 +26,12 @@ import java.io.InputStream;
 
 public class YourService extends KiboRpcService {
     @Override
-    protected void runPlan1(){
+    protected void runPlan1() {
         // Init Camera stuff
 
-        Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
-        cameraMatrix.put(0,0,api.getNavCamIntrinsics()[0]);
-        Mat cameraCoefficients = new Mat(1,5,CvType.CV_64F);
+        Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
+        Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
         cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
 
@@ -52,6 +53,28 @@ public class YourService extends KiboRpcService {
         AreaQuaternion.put(3, new Quaternion(0f, 0.7071f, 0f, 0.7071f));
         AreaPoint.put(4, new Point(10.4d, -6.85d, 4.95d));
         AreaQuaternion.put(4, new Quaternion(0f, 0f, 1f, 0f));
+
+        // Init all the image
+
+        Mat[] template_images = new Mat[11];
+        template_images[0] = Imgcodecs.imread("src/main/item_template_images/coin.png");
+        template_images[1] = Imgcodecs.imread("src/main/item_template_images/compass.png");
+        template_images[2] = Imgcodecs.imread("src/main/item_template_images/coral.png");
+        template_images[3] = Imgcodecs.imread("src/main/item_template_images/crystal.png");
+        template_images[4] = Imgcodecs.imread("src/main/item_template_images/diamond.png");
+        template_images[5] = Imgcodecs.imread("src/main/item_template_images/emerald.png");
+        template_images[6] = Imgcodecs.imread("src/main/item_template_images/fossil.png");
+        template_images[7] = Imgcodecs.imread("src/main/item_template_images/key.png");
+        template_images[8] = Imgcodecs.imread("src/main/item_template_images/letter.png");
+        template_images[9] = Imgcodecs.imread("src/main/item_template_images/shell.png");
+        template_images[10] = Imgcodecs.imread("src/main/item_template_images/treasure_box.png");
+
+        for (int i = 0; i < 11; i++) {
+            Imgproc.cvtColor(template_images[i], template_images[i], Imgproc.COLOR_BGR2GRAY);
+        }
+
+        //start mission
+
         api.startMission();
 
         // Move to a point.
@@ -67,9 +90,6 @@ public class YourService extends KiboRpcService {
         Mat undistorted_aruco = unDistortImage(image);
         Mat undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area1_undistorted.png");
-        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
-        api.saveMatImage(undistorted_aruco, "area1_arucotag.png");
 
         rMoveTo(AreaPoint.get(2), AreaQuaternion.get(2));
 
@@ -79,9 +99,6 @@ public class YourService extends KiboRpcService {
         undistorted_aruco = unDistortImage(image);
         undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area2_undistorted.png");
-        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
-        api.saveMatImage(undistorted_aruco, "area2_arucotag.png");
 
         rMoveTo(AreaPoint.get(3), AreaQuaternion.get(3));
 
@@ -91,9 +108,8 @@ public class YourService extends KiboRpcService {
         undistorted_aruco = unDistortImage(image);
         undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area3_undistorted.png");
-        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
-        api.saveMatImage(undistorted_aruco, "area3_arucotag.png");
+        Mat undistortedAligned  = alignImage(undistorted,-45,45);
+        api.saveMatImage(undistortedAligned, "area3_aligned.png");
 
         rMoveTo(AreaPoint.get(4), AreaQuaternion.get(4));
 
@@ -103,9 +119,6 @@ public class YourService extends KiboRpcService {
         undistorted_aruco = unDistortImage(image);
         undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area4_undistorted.png");
-        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
-        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
-        api.saveMatImage(undistorted_aruco, "area4_arucotag.png");
 
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
@@ -147,12 +160,12 @@ public class YourService extends KiboRpcService {
     }
 
     @Override
-    protected void runPlan2(){
-       // write your plan 2 here.
+    protected void runPlan2() {
+        // write your plan 2 here.
     }
 
     @Override
-    protected void runPlan3(){
+    protected void runPlan3() {
         // write your plan 3 here.
     }
 
@@ -174,18 +187,121 @@ public class YourService extends KiboRpcService {
         }
 
     }
-    private Mat unDistortImage(Mat image){
-        Mat cameraMatrix = new Mat(3,3,CvType.CV_64F);
-        cameraMatrix.put(0,0,api.getNavCamIntrinsics()[0]);
-        Mat cameraCoefficients = new Mat(1,5,CvType.CV_64F);
+
+    private Mat unDistortImage(Mat image) {
+        Mat cameraMatrix = new Mat(3, 3, CvType.CV_64F);
+        cameraMatrix.put(0, 0, api.getNavCamIntrinsics()[0]);
+        Mat cameraCoefficients = new Mat(1, 5, CvType.CV_64F);
         cameraCoefficients.put(0, 0, api.getNavCamIntrinsics()[1]);
         cameraCoefficients.convertTo(cameraCoefficients, CvType.CV_64F);
         Mat undistortImg = new Mat();
         Calib3d.undistort(image, undistortImg, cameraMatrix, cameraCoefficients);
         return undistortImg;
     }
-    private String ImageRecognition(Mat image){
+
+    private String ImageRecognition(Mat image) {
         return "object type";
+    }
+
+    private Map<Integer, double[][]> getCornersById(Mat image) {
+        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_4X4_50);
+        Mat ids = new Mat();
+        List<Mat> corners = new ArrayList<>();
+
+        Aruco.detectMarkers(image, dictionary, corners, ids);
+
+        Map<Integer, double[][]> cornerMap = new HashMap<>();
+
+        for (int i = 0; i < corners.size(); i++) {
+            // Get marker ID
+            int id = (int) ids.get(i, 0)[0];
+
+            // Get corners
+            Mat cornerMat = corners.get(i);
+            float[] data = new float[8]; // 4 corners * 2 coords
+            cornerMat.get(0, 0, data);
+
+            double[][] cornerArray = new double[4][2];
+            for (int j = 0; j < 4; j++) {
+                cornerArray[j][0] = data[j * 2];     // x
+                cornerArray[j][1] = data[j * 2 + 1]; // y
+            }
+
+            cornerMap.put(id, cornerArray);
+        }
+
+        return cornerMap;
+    }
+
+    private Mat rotateImage(Mat src, double angle) {
+        double cx = src.width() / 2.0;
+        double cy = src.height() / 2.0;
+
+        double cos = Math.cos(Math.toRadians(angle));
+        double sin = Math.sin(Math.toRadians(angle));
+
+        Mat rotMat = new Mat(2, 3, CvType.CV_64F);
+        rotMat.put(0, 0,
+                cos, -sin, (1 - cos) * cx + sin * cy,
+                sin, cos, (1 - cos) * cy - sin * cx
+        );
+
+        Mat dst = new Mat();
+        Imgproc.warpAffine(src, dst, rotMat, src.size());
+        return dst;
+    }
+
+    private double getSlope(double[] p1, double[] p2) {
+        double dx = p2[0] - p1[0];
+        if (Math.abs(dx) < 1e-6) return Double.POSITIVE_INFINITY;
+        return (p2[1] - p1[1]) / dx;
+    }
+
+    private double[] extractCorner(Mat cornerMat, int idx) {
+        float[] data = new float[8];
+        cornerMat.get(0, 0, data);
+        return new double[]{data[idx * 2], data[idx * 2 + 1]};
+    }
+
+    private double tryGetSlope(Mat image) {
+        Dictionary dict = Aruco.getPredefinedDictionary(Aruco.DICT_4X4_50);
+        Mat ids = new Mat();
+        List<Mat> corners = new ArrayList<>();
+        Aruco.detectMarkers(image, dict, corners, ids);
+
+        if (corners.isEmpty()) return Double.NaN;
+
+        Mat firstCorner = corners.get(0);
+        double[] p0 = extractCorner(firstCorner, 0);
+        double[] p2 = extractCorner(firstCorner, 2);
+        return getSlope(p0, p2);
+    }
+
+    private Mat alignImage(Mat input, double minAngle, double maxAngle) {
+        while ((maxAngle - minAngle) > 0.1) {
+            double midAngle = (minAngle + maxAngle) / 2.0;
+            Mat rotated = rotateImage(input, midAngle);
+            double slope = tryGetSlope(rotated);
+
+            if (Double.isNaN(slope)) {
+                System.out.println("Marker not found at angle: " + midAngle);
+                break;
+            }
+
+            System.out.printf("Angle: %.2f, Slope: %.4f%n", midAngle, slope);
+
+            if (Math.abs(slope + 1) < 0.05) {
+                return rotated;
+            }
+
+            if (slope > -1) {
+                minAngle = midAngle;
+            } else {
+                maxAngle = midAngle;
+            }
+        }
+
+        return input;
     }
 }
 // hfs shift5
