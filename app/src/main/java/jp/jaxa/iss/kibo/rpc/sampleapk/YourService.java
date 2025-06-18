@@ -46,6 +46,8 @@ public class YourService extends KiboRpcService {
         Map<Integer, Quaternion> AreaQuaternion = new HashMap<>();
         AreaPoint.put(1, new Point(10.9d, -9.92284d, 5.195d));
         AreaQuaternion.put(1, new Quaternion(0f, 0f, -0.707f, 0.707f));
+        AreaPoint.put(2, new Point(10.925d, -8.875d, 4.3d));
+        AreaQuaternion.put(2, new Quaternion(1,0,0,0));
         api.startMission();
 
         // Move to a point.
@@ -61,9 +63,20 @@ public class YourService extends KiboRpcService {
         Mat undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area1_undistorted.png");
         Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
-        //Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
-
+        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
         api.saveMatImage(undistorted_aruco, "area1_arucotag.png");
+
+        rMoveTo(AreaPoint.get(2), AreaQuaternion.get(2));
+
+        // Get a camera image.
+        image = api.getMatNavCam();
+        api.saveMatImage(image, "area2_raw.png");
+        undistorted_aruco = unDistortImage(image);
+        undistorted = undistorted_aruco.clone();
+        api.saveMatImage(undistorted, "area2_undistorted.png");
+        Aruco.detectMarkers(undistorted_aruco, dictionary, corners, ids);
+        Aruco.drawDetectedMarkers(undistorted_aruco, corners, ids);
+        api.saveMatImage(undistorted_aruco, "area2_arucotag.png");
 
         /* ******************************************************************************** */
         /* Write your code to recognize the type and number of landmark items in each area! */
