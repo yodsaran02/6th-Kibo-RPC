@@ -108,8 +108,6 @@ public class YourService extends KiboRpcService {
         undistorted_aruco = unDistortImage(image);
         undistorted = undistorted_aruco.clone();
         api.saveMatImage(undistorted, "area3_undistorted.png");
-        Mat undistortedAligned  = alignImage(undistorted,-45,45);
-        api.saveMatImage(undistortedAligned, "area3_aligned.png");
 
         rMoveTo(AreaPoint.get(4), AreaQuaternion.get(4));
 
@@ -201,107 +199,6 @@ public class YourService extends KiboRpcService {
 
     private String ImageRecognition(Mat image) {
         return "object type";
-    }
-
-    private Map<Integer, double[][]> getCornersById(Mat image) {
-        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_4X4_50);
-        Mat ids = new Mat();
-        List<Mat> corners = new ArrayList<>();
-
-        Aruco.detectMarkers(image, dictionary, corners, ids);
-
-        Map<Integer, double[][]> cornerMap = new HashMap<>();
-
-        for (int i = 0; i < corners.size(); i++) {
-            // Get marker ID
-            int id = (int) ids.get(i, 0)[0];
-
-            // Get corners
-            Mat cornerMat = corners.get(i);
-            float[] data = new float[8]; // 4 corners * 2 coords
-            cornerMat.get(0, 0, data);
-
-            double[][] cornerArray = new double[4][2];
-            for (int j = 0; j < 4; j++) {
-                cornerArray[j][0] = data[j * 2];     // x
-                cornerArray[j][1] = data[j * 2 + 1]; // y
-            }
-
-            cornerMap.put(id, cornerArray);
-        }
-
-        return cornerMap;
-    }
-
-    private Mat rotateImage(Mat src, double angle) {
-        double cx = src.width() / 2.0;
-        double cy = src.height() / 2.0;
-
-        double cos = Math.cos(Math.toRadians(angle));
-        double sin = Math.sin(Math.toRadians(angle));
-
-        Mat rotMat = new Mat(2, 3, CvType.CV_64F);
-        rotMat.put(0, 0,
-                cos, -sin, (1 - cos) * cx + sin * cy,
-                sin, cos, (1 - cos) * cy - sin * cx
-        );
-
-        Mat dst = new Mat();
-        Imgproc.warpAffine(src, dst, rotMat, src.size());
-        return dst;
-    }
-
-    private double getSlope(double[] p1, double[] p2) {
-        double dx = p2[0] - p1[0];
-        if (Math.abs(dx) < 1e-6) return Double.POSITIVE_INFINITY;
-        return (p2[1] - p1[1]) / dx;
-    }
-
-    private double[] extractCorner(Mat cornerMat, int idx) {
-        float[] data = new float[8];
-        cornerMat.get(0, 0, data);
-        return new double[]{data[idx * 2], data[idx * 2 + 1]};
-    }
-
-    private double tryGetSlope(Mat image) {
-        Dictionary dict = Aruco.getPredefinedDictionary(Aruco.DICT_4X4_50);
-        Mat ids = new Mat();
-        List<Mat> corners = new ArrayList<>();
-        Aruco.detectMarkers(image, dict, corners, ids);
-
-        if (corners.isEmpty()) return Double.NaN;
-
-        Mat firstCorner = corners.get(0);
-        double[] p0 = extractCorner(firstCorner, 0);
-        double[] p2 = extractCorner(firstCorner, 2);
-        return getSlope(p0, p2);
-    }
-
-    private Mat alignImage(Mat input, double minAngle, double maxAngle) {
-        while ((maxAngle - minAngle) > 0.1) {
-            double midAngle = (minAngle + maxAngle) / 2.0;
-            Mat rotated = rotateImage(input, midAngle);
-            double slope = tryGetSlope(rotated);
-
-            if (Double.isNaN(slope)) {
-                System.out.println("Marker not found at angle: " + midAngle);
-                break;
-            }
-
-            System.out.printf("Angle: %.2f, Slope: %.4f%n", midAngle, slope);
-
-            if (Math.abs(slope + 1) < 0.05) {
-                return rotated;
-            }
-
-            if (slope > -1) {
-                minAngle = midAngle;
-            } else {
-                maxAngle = midAngle;
-            }
-        }
-
-        return input;
     }
 }
 // hfs shift5
